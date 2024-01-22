@@ -42,7 +42,7 @@ jobs:
             echo "$IMAGE_TAG"
 
             # Variables
-            GIT_REPO_INFRA="https://github.com/AhmedZedan/Bake-House-Infra.git"
+            GIT_REPO_INFRA="github.com/AhmedZedan/Bake-House-Infra.git"
             DEPLOYMENT_FILE_PATH="./Deployment/deploy.yaml"
             GITHUB_TOKEN="${GITHUB_TOKEN}"
 
@@ -51,7 +51,7 @@ jobs:
             git config --global user.name "$USERNAME"
 
             # Clone the infra repository
-            git clone https://${GITHUB_TOKEN}@$GIT_REPO_INFRA
+            git clone https://${GITHUB_TOKEN}@${GIT_REPO_INFRA}
             cd Bake-House-Infra
 
             # Update the deployment file
