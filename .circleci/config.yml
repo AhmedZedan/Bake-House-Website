@@ -44,7 +44,7 @@ jobs:
             # Variables
             GIT_REPO_INFRA="https://github.com/AhmedZedan/Bake-House-Infra.git"
             DEPLOYMENT_FILE_PATH="./Deployment/deploy.yaml"
-            GITHUB_TOKEN="${GITHUB_TOKEN}
+            GITHUB_TOKEN="${GITHUB_TOKEN}"
 
             # Setup Git
             git config --global user.email "$EMAIL"
