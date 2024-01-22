@@ -1,0 +1,76 @@
+version: 2.1
+
+executors:
+  docker-publisher:
+    docker:
+      - image: cimg/python:3.12.1
+
+jobs:
+
+  build:
+    executor: docker-publisher
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t $IMAGE_NAME:latest .
+      - run:
+          name: Publish Docker Image to Docker Hub
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            IMAGE_TAG="0.0.${CIRCLE_BUILD_NUM}"
+            mkdir -p /tmp/workspace
+            echo "export IMAGE_TAG=\"0.0.${CIRCLE_BUILD_NUM}\"" >> /tmp/workspace/env_vars
+            docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
+            docker push $IMAGE_NAME:$IMAGE_TAG
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - env_vars  
+  
+  deploy:
+    executor: docker-publisher
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: deploy service
+          command: |
+            source /tmp/workspace/env_vars
+            echo "$IMAGE_TAG"
+
+            # Variables
+            GIT_REPO_INFRA="https://github.com/AhmedZedan/Bake-House-Infra.git"
+            DEPLOYMENT_FILE_PATH="./Deployment/deploy.yaml"
+
+            # Setup Git
+            git config --global user.email "$EMAIL"
+            git config --global user.name "$USERNAME"
+
+            # Clone the infra repository
+            git clone $GIT_REPO_INFRA
+            cd Bake-House-Infra
+
+            # Update the deployment file
+            sed -i "s|image: .*|image: $IMAGE_NAME:$IMAGE_TAG|g" $DEPLOYMENT_FILE_PATH
+
+            # Commit and push the changes
+            git add $DEPLOYMENT_FILE_PATH
+            git commit -m "Update deployment image to $IMAGE_TAG"
+            git push -u origin master
+            
+workflows:
+  test-build-deploy:
+    jobs:
+       - build:
+          filters:
+            branches:
+              only: master
+       - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
