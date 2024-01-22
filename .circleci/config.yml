@@ -7,7 +7,7 @@ executors:
 
 jobs:
 
-  build:
+  build-and-push:
     executor: docker-publisher
     steps:
       - checkout
@@ -30,7 +30,7 @@ jobs:
           paths:
             - env_vars  
   
-  deploy:
+  update-image-tag:
     executor: docker-publisher
     steps:
       - attach_workspace:
@@ -62,15 +62,15 @@ jobs:
             git push -u origin master
             
 workflows:
-  test-build-deploy:
+  ci-pipeline:
     jobs:
-       - build:
+       - build-and-push:
           filters:
             branches:
               only: master
-       - deploy:
+       - update-image-tag:
           requires:
-            - build
+            - build-and-push
           filters:
             branches:
               only: master
