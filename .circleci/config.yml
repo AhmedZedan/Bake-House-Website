@@ -44,13 +44,14 @@ jobs:
             # Variables
             GIT_REPO_INFRA="https://github.com/AhmedZedan/Bake-House-Infra.git"
             DEPLOYMENT_FILE_PATH="./Deployment/deploy.yaml"
+            GITHUB_TOKEN="${GITHUB_TOKEN}
 
             # Setup Git
             git config --global user.email "$EMAIL"
             git config --global user.name "$USERNAME"
 
             # Clone the infra repository
-            git clone $GIT_REPO_INFRA
+            git clone https://${GITHUB_TOKEN}@$GIT_REPO_INFRA
             cd Bake-House-Infra
 
             # Update the deployment file
